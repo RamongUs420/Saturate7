@@ -70,33 +70,3 @@ así que no necesitas instalar Visual Studio ni JUCE.
 3. Ve a la pestaña **Actions** del repositorio. El workflow *Build Saturate7 VST3* se lanza solo al subir
    el código (o pulsa **Run workflow**). Tarda unos 10-15 minutos la primera vez.
 4. Al terminar, entra en la ejecución y descarga el artefacto **Saturate7-VST3-Windows-x64** (un .zip).
-
-## Instalación
-
-Descomprime y copia la carpeta **Saturate7.vst3** entera (es un bundle, no un solo archivo) a:
-
-    C:\Program Files\Common Files\VST3\
-
-Después reescanea plugins en tu DAW. Windows puede mostrar un aviso de SmartScreen porque el plugin no está firmado.
-
-## Controles
-
-- **Bandas**: SUB 20-60 Hz, LOW 60-250, LOW-MID 250-1k, MID 1k-3.5k, HI-MID 3.5k-8k, HIGH 8k-14k, AIR 14k-20k.
-  Cada una con Solo, Mute, fader Mix (0 % = limpia, 100 % = procesada) y vúmetro.
-- **Main Filters**: High-Pass y Low-Pass sobre la señal ya procesada (12 dB/oct).
-- **Master**: Input, Mode (Saturate / Distort), Threshold, Curve (Tanh Soft, Hard Clip, Tube, Tape,
-  Asymmetric, Foldback, Arctan, Sine) y Output.
-- **Oversampling**: Off, 2x, 4x, 8x, 16x (el plugin informa su latencia al DAW).
-- **Analizador FFT** de fondo, con cada banda alineada con su columna de controles.
-
-## Notas de diseño
-
-- Las bandas usan crossovers Linkwitz-Riley de 24 dB/oct con compensación all-pass, de modo que con todos los
-  Mix a 0 % la suma es plana (verificado numéricamente).
-- Threshold fija el nivel a partir del cual actúa la curva; cuanto más bajo, más saturación.
-  En modo Distort la señal entra con más empuje (x5).
-- Los huecos del diseño original (6-8 kHz) se han cubierto: HI-MID llega hasta 8 kHz.
-
-## Si el build falla
-
-Entra en la ejecución fallida en Actions, copia las líneas de error rojas y envíamelas para corregirlo.
