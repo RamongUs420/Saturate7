@@ -35,7 +35,8 @@ Saturate7AudioProcessorEditor::Saturate7AudioProcessorEditor (Saturate7AudioProc
     for (int i = 0; i < s7::numBands; ++i)
     {
         strips[(size_t) i] = std::make_unique<BandStrip> (p.apvts, i);
-        addAndMakeVisible (*strips[(size_t) i]);
+        if (strips[(size_t) i] != nullptr)
+            addAndMakeVisible (*strips[(size_t) i]);
     }
 
     osBox.addItemList (s7::osNames(), 1);
@@ -58,17 +59,20 @@ Saturate7AudioProcessorEditor::Saturate7AudioProcessorEditor (Saturate7AudioProc
     addAndMakeVisible (satBtn);
     addAndMakeVisible (distBtn);
 
-    modeAtt = std::make_unique<juce::ParameterAttachment> (*p.apvts.getParameter ("mode"),
-        [this] (float v)
-        {
-            const bool d = v > 0.5f;
-            satBtn.setToggleState (! d, juce::dontSendNotification);
-            distBtn.setToggleState (d, juce::dontSendNotification);
-        });
-    modeAtt->sendInitialUpdate();
+    if (auto* modeParam = p.apvts.getParameter ("mode"))
+    {
+        modeAtt = std::make_unique<juce::ParameterAttachment> (*modeParam,
+            [this] (float v)
+            {
+                const bool d = v > 0.5f;
+                satBtn.setToggleState (! d, juce::dontSendNotification);
+                distBtn.setToggleState (d, juce::dontSendNotification);
+            });
+        modeAtt->sendInitialUpdate();
 
-    satBtn.onClick  = [this] { modeAtt->setValueAsCompleteGesture (0.0f); };
-    distBtn.onClick = [this] { modeAtt->setValueAsCompleteGesture (1.0f); };
+        satBtn.onClick  = [this] { if (modeAtt) modeAtt->setValueAsCompleteGesture (0.0f); };
+        distBtn.onClick = [this] { if (modeAtt) modeAtt->setValueAsCompleteGesture (1.0f); };
+    }
 
     curveBox.addItemList (s7::curveNames(), 1);
     addAndMakeVisible (curveBox);
@@ -93,7 +97,8 @@ void Saturate7AudioProcessorEditor::timerCallback()
     {
         const float peak = proc.bandPeak[b].exchange (0.0f);
         meterLevel[b] = juce::jmax (peak, meterLevel[b] * 0.82f);
-        strips[b]->setMeterLevel (meterLevel[b]);
+        if (strips[b] != nullptr)
+            strips[b]->setMeterLevel (meterLevel[b]);
     }
 }
 
@@ -106,7 +111,7 @@ void Saturate7AudioProcessorEditor::paint (juce::Graphics& g)
                                        Colour (0xff171a21), 0.0f, (float) getHeight(), false));
     g.fillAll();
 
-    // Titulo
+    // Título
     AttributedString title;
     title.append ("SATURATE", makeFont (26.0f, true), Colours::white);
     title.append ("7", makeFont (26.0f, true), bandColour (0));
@@ -144,7 +149,8 @@ void Saturate7AudioProcessorEditor::resized()
     for (int i = 0; i < s7::numBands; ++i)
     {
         auto cell = (i == s7::numBands - 1) ? bandArea : bandArea.removeFromLeft (w);
-        strips[(size_t) i]->setBounds (cell);
+        if (strips[(size_t) i] != nullptr)
+            strips[(size_t) i]->setBounds (cell);
     }
 
     r.removeFromTop (8);
